@@ -1,0 +1,10 @@
+{
+  "name": "BOPlish-node-client",
+  "version": "0.0.1",
+  "dependencies": {
+    "websocket": "~1.0.8",
+    "wrtc": "~0.0.18",
+    "winston": "~0.7.3",
+    "commander": "~2.2.0" 
+  }
+}
