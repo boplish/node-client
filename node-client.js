@@ -31,7 +31,7 @@ function spawnBopClients(quantity, onsuccess, onerror) {
     }
 
     var bopclient = new BOPlishClient(bootstrapNode, function(msg) {
-        logger.info(bopclient.id, 'spawned')
+        logger.info(bopclient.id, 'spawned');
         process.nextTick(function() {
             spawnBopClients(--quantity, onsuccess, onerror);
         });
