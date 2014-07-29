@@ -13,13 +13,12 @@ var fork = require('child_process').fork;
 logger.remove(logger.transports.Console);
 logger.add(logger.transports.Console, {'timestamp': true, 'colorize': true});
 program
-    .version('0.0.1')
-    .option('-h, --host <ip>', 'Bootstrap Host address', String, '127.0.0.1')
-    .option('-p, --port <port>', 'Bootstrap Host port', Number, 5000)
+    .version('0.0.2')
+    .option('-b, --bootstrap <URI>', 'Bootstrap Host information', String, 'wss://127.0.0.1/')
     .option('-c, --count <count>', 'Number of clients to spawn', Number, 1)
     .parse(process.argv);
 
-var bootstrapNode = program.host + ':' + program.port;
+var bootstrapNode = program.bootstrap;
 
 function spawnBopClients(quantity, onsuccess, onerror) {
     if (quantity <= 0) {
@@ -31,8 +30,8 @@ function spawnBopClients(quantity, onsuccess, onerror) {
 
     var client = fork('./node-client.js', [bootstrapNode]);
     client.on('message', function(msg) {
-    	if (msg.err) {
-    		onerror(err);
+    	if (msg.error) {
+    		onerror(msg.error);
     	} else {
     		logger.info(msg.id, 'spawned');
                 spawnBopClients(--quantity, onsuccess, onerror);
