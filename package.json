@@ -2,9 +2,11 @@
   "name": "BOPlish-node-client",
   "version": "0.0.1",
   "dependencies": {
+    "commander": "~2.2.0",
+    "restify": "^2.8.2",
+    "watershed": "^0.3.0",
     "websocket": "~1.0.8",
-    "wrtc": "~0.0.18",
     "winston": "~0.7.3",
-    "commander": "~2.2.0" 
+    "wrtc": "~0.0.18"
   }
 }
