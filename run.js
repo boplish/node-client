@@ -16,13 +16,11 @@ logger.add(logger.transports.Console, {'timestamp': true, 'colorize': true});
 program
     .version('0.0.2')
     .option('-b, --bootstrap <URI>', 'Bootstrap Host information', String, 'wss://127.0.0.1/')
-    .option('-l, --listen <IP:port>', 'Listener IP', String, '127.0.0.1:8080')
+    .option('-p, --port <port>', 'Listen Port', String, '1337')
     .parse(process.argv);
 
 var bootstrapNode = program.bootstrap;
-var listen = program.listen;
-var listenIP = listen.substring(0,listen.indexOf(':'));
-var listenPort = listen.substring(listen.indexOf(':') + 1);
+var listenPort = program.port;
 var server = restify.createServer();
 server.use(restify.CORS());
 
@@ -134,5 +132,5 @@ function rest_registerLogHandler(req, res, next) {
 }
 
 server.listen(listenPort, function() {
-    logger.info('BOPlish host listening on ' + listenIP + ':' + listenPort);
+    logger.info('BOPlish host listening on port ' + listenPort);
 });
