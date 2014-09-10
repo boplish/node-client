@@ -24,6 +24,7 @@ var listen = program.listen;
 var listenIP = listen.substring(0,listen.indexOf(':'));
 var listenPort = listen.substring(listen.indexOf(':') + 1);
 var server = restify.createServer();
+server.use(restify.CORS());
 
 var peers = {};
 
