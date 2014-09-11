@@ -43,13 +43,13 @@ server.post('/peer', rest_startPeer);
 server.del('/peer/:id', rest_abortPeer);
 server.get('/peer/:id', rest_getStatusOfPeer);
 server.get('/listAllIds', rest_listAllIds);
-server.get('/killAll', rest_killAll);
+server.del('/killAll', rest_killAll);
 server.get('/getLogHandler', rest_registerLogHandler);
 
 function killPeer(peerId) {
     if (typeof(peers[peerId]) !== 'undefined') {
         var peer = peers[peerId];
-        peer.process.kill();no
+        peer.process.kill();
         delete peers[peerId];
         return peer;
     } else {
@@ -58,6 +58,7 @@ function killPeer(peerId) {
 }
 
 function rest_startPeer(req, res, next) {
+    logger.info('rest_startPeer', req.params);
     var client = fork('./node-client.js', [bootstrapNode]);
     client.on('message', function(msg) {
         if (!msg || msg.error) {
@@ -74,11 +75,13 @@ function rest_startPeer(req, res, next) {
             next();
         } else if (msg.type === 'boplishMessage') {
             mediator.send(msg);
+            //@todo: implement mediator
         }
     });
 }
 
 function rest_abortPeer(req, res, next) {
+    logger.info('rest_abortPeer', req.params);
     var peer = killPeer(req.params.id);
     var response = {
         id: peer.id,
@@ -89,6 +92,7 @@ function rest_abortPeer(req, res, next) {
 }
 
 function rest_getStatusOfPeer(req, res, next) {
+    logger.info('rest_getStatusOfPeer', req.params);
     if (typeof(peers[req.params.id]) === 'undefined') {
         res.send('invalid id ' + req.params.id);
         return next();
@@ -97,13 +101,14 @@ function rest_getStatusOfPeer(req, res, next) {
     var response = {
         id: req.params.id,
         started: peer.started,
-        boostrapNode: peer.bootstrapNode
+        bootstrapNode: peer.bootstrapNode
     }
     res.send(response);
     next();
 }
 
 function rest_listAllIds(req, res, next) {
+    logger.info('rest_listAllIds', req.params);
     var keys = [];
     for(var k in peers) {
         keys.push(k);
@@ -113,6 +118,7 @@ function rest_listAllIds(req, res, next) {
 }
 
 function rest_killAll(req, res, next) {
+    logger.info('rest_killAll', req.params);
     for(var k in peers) {
         killPeer(k);
     }
@@ -121,6 +127,7 @@ function rest_killAll(req, res, next) {
 }
 
 function rest_registerLogHandler(req, res, next) {
+    logger.info('rest_registerLogHandler', req.params);
     if (!res.claimUpgrade) {
         next(new Error('Connection Must Upgrade For WebSockets'));
         return;
@@ -134,3 +141,19 @@ function rest_registerLogHandler(req, res, next) {
 server.listen(listenPort, function() {
     logger.info('BOPlish host listening on port ' + listenPort);
 });
+
+process.on('SIGTERM', function() {
+    killPeersAndDie();
+});
+
+process.on('SIGINT', function() {
+    killPeersAndDie();
+})
+
+function killPeersAndDie() {
+    for(var k in peers) {
+        console.log('killing', k);
+        killPeer(k);
+    }
+    process.exit();    
+}
