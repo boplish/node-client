@@ -13,6 +13,6 @@ var bopclient = new BOPlishClient(bootstrapNode, function(msg) {
     process.send({error: err, id: null});
 });
 
-bopclient.setMonitorCallback(function(from, payload) {
-	process.send({type: 'boplishMessage', from: from, payload: payload});
+bopclient.setMonitorCallback(function(payload) {
+	process.send({type: 'boplishMessage', payload: payload});
 });
