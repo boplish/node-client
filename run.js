@@ -7,6 +7,7 @@ var logger = require('winston');
 var program = require('commander');
 var fork = require('child_process').fork;
 var restify = require('restify');
+var Watershed = require('watershed').Watershed;
 
 /** 
  * Module configuration
@@ -21,7 +22,9 @@ program
 
 var bootstrapNode = program.bootstrap;
 var listenPort = program.port;
-var server = restify.createServer();
+var server = restify.createServer({
+    handleUpgrades: true
+});
 server.use(restify.CORS());
 
 var peers = {};
@@ -30,11 +33,15 @@ var Mediator = function() {};
 Mediator.prototype = {
     websocket: null,
     send: function(msg) {
+        // measure msg/sec
         try {
-            this.websocket.send(msg);
+            this.websocket.send(JSON.stringify(msg));
         } catch(e) {
             // WS not ready yet
         }
+    },
+    onmessage: function(msg) {
+        console.log(msg);
     }
 }
 var mediator = new Mediator();
@@ -43,8 +50,10 @@ server.post('/peer', rest_startPeer);
 server.del('/peer/:id', rest_abortPeer);
 server.get('/peer/:id', rest_getStatusOfPeer);
 server.get('/listAllIds', rest_listAllIds);
+server.get('/peers', rest_listAllIds);
 server.del('/killAll', rest_killAll);
-server.get('/getLogHandler', rest_registerLogHandler);
+server.get('/registerLogHandler', rest_registerLogHandler);
+server.get('/status', rest_getHostStatus);
 
 function killPeer(peerId) {
     if (typeof(peers[peerId]) !== 'undefined') {
@@ -74,7 +83,8 @@ function rest_startPeer(req, res, next) {
             res.send({id: msg.id});
             next();
         } else if (msg.type === 'boplishMessage') {
-            mediator.send(msg);
+            console.log(msg);
+            mediator.send(msg.payload);
             //@todo: implement mediator
         }
     });
@@ -134,7 +144,9 @@ function rest_registerLogHandler(req, res, next) {
     }
 
     var upgrade = res.claimUpgrade();
+    var ws = new Watershed();
     mediator.websocket = ws.accept(req, upgrade.socket, upgrade.head);
+    mediator.websocket.on('text', mediator.onmessage);
     next(false);
 }
 
