@@ -22,6 +22,7 @@ program
 
 var bootstrapNode = program.bootstrap;
 var listenPort = program.port;
+var startDate = new Date();
 var server = restify.createServer({
     handleUpgrades: true
 });
@@ -32,9 +33,13 @@ var peers = {};
 var Mediator = function() {};
 Mediator.prototype = {
     websocket: null,
-    send: function(msg) {
+    send: function(bopmsg) {
         // measure msg/sec
         try {
+            var msg = {
+                bopmsg: bopmsg,
+                timestamp: new Date()
+            };
             this.websocket.send(JSON.stringify(msg));
         } catch(e) {
             // WS not ready yet
@@ -43,7 +48,7 @@ Mediator.prototype = {
     onmessage: function(msg) {
         console.log(msg);
     }
-}
+};
 var mediator = new Mediator();
 
 server.post('/peer', rest_startPeer);
@@ -53,7 +58,7 @@ server.get('/listAllIds', rest_listAllIds);
 server.get('/peers', rest_listAllIds);
 server.del('/killAll', rest_killAll);
 server.get('/registerLogHandler', rest_registerLogHandler);
-server.get('/status', rest_getHostStatus);
+// server.get('/status', rest_getHostStatus);
 
 function killPeer(peerId) {
     if (typeof(peers[peerId]) !== 'undefined') {
@@ -83,7 +88,6 @@ function rest_startPeer(req, res, next) {
             res.send({id: msg.id});
             next();
         } else if (msg.type === 'boplishMessage') {
-            console.log(msg);
             mediator.send(msg.payload);
             //@todo: implement mediator
         }
@@ -96,7 +100,7 @@ function rest_abortPeer(req, res, next) {
     var response = {
         id: peer.id,
         status: 'killed'
-    }
+    };
     res.send(response);
     next();
 }
@@ -112,7 +116,7 @@ function rest_getStatusOfPeer(req, res, next) {
         id: req.params.id,
         started: peer.started,
         bootstrapNode: peer.bootstrapNode
-    }
+    };
     res.send(response);
     next();
 }
@@ -150,6 +154,12 @@ function rest_registerLogHandler(req, res, next) {
     next(false);
 }
 
+function rest_getHostStatus(req, res, next) {
+    logger.info('rest_getHostStatus', req.params);
+    res.send({status:'ok'});
+    next();
+}
+
 server.listen(listenPort, function() {
     logger.info('BOPlish host listening on port ' + listenPort);
 });
@@ -160,7 +170,7 @@ process.on('SIGTERM', function() {
 
 process.on('SIGINT', function() {
     killPeersAndDie();
-})
+});
 
 function killPeersAndDie() {
     for(var k in peers) {
