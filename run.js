@@ -162,7 +162,6 @@ function rest_getHostStatus(req, res, next) {
         bootstrapNode: bootstrapNode,
         numberOfPeers: Object.keys(peers).length
     };
-    console.log(status);
 
     res.send(status);
     next();
