@@ -30,7 +30,7 @@ describe('BOPlish Emulation Host test', function() {
 		});
 	});
 	it('should list Peer Ids Peer', function(done) {
-		restClient.get('/listAllIds', function(err, req, res, obj) {
+		restClient.get('/peers', function(err, req, res, obj) {
 			assert.ifError(err);
 			obj.should.containEql(peerId);
 			done();
@@ -69,6 +69,15 @@ describe('BOPlish Emulation Host test', function() {
 					});
 				});
 			});
+		});
+	});
+	it('should get Host status', function(done) {
+		restClient.get('/status', function(err, req, res, obj) {
+			assert.ifError(err);
+			obj.startDate.should.not.be.empty;
+			obj.bootstrapNode.should.not.be.empty;
+			obj.numberOfPeers.should.equal(0);
+			done();
 		});
 	});
 	it('should request log handler');

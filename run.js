@@ -58,7 +58,7 @@ server.get('/listAllIds', rest_listAllIds);
 server.get('/peers', rest_listAllIds);
 server.del('/killAll', rest_killAll);
 server.get('/registerLogHandler', rest_registerLogHandler);
-// server.get('/status', rest_getHostStatus);
+server.get('/status', rest_getHostStatus);
 
 function killPeer(peerId) {
     if (typeof(peers[peerId]) !== 'undefined') {
@@ -156,7 +156,15 @@ function rest_registerLogHandler(req, res, next) {
 
 function rest_getHostStatus(req, res, next) {
     logger.info('rest_getHostStatus', req.params);
-    res.send({status:'ok'});
+
+    var status = {
+        startDate: startDate,
+        bootstrapNode: bootstrapNode,
+        numberOfPeers: Object.keys(peers).length
+    };
+    console.log(status);
+
+    res.send(status);
     next();
 }
 
