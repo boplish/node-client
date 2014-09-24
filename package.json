@@ -1,9 +1,12 @@
 {
   "name": "BOPlish-node-client",
   "version": "0.0.1",
-  "scripts": {"test": "mocha -R spec test/test.js"},
+  "scripts": {
+    "test": "mocha -R spec test/test.js"
+  },
   "dependencies": {
     "commander": "~2.2.0",
+    "node-localstorage": "^0.3.4",
     "restify": "^2.8.2",
     "watershed": "^0.3.0",
     "websocket": "~1.0.8",
@@ -11,7 +14,7 @@
     "wrtc": "~0.0.18"
   },
   "devDependencies": {
-    "should": "^4.0.4",
-    "mocha": "*"
+    "mocha": "*",
+    "should": "^4.0.4"
   }
 }

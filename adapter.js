@@ -1,6 +1,8 @@
 var util = require('util');
 var webrtc = require('wrtc');
 var WebSocketClient = require('websocket').client;
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
 
 RTCPeerConnection = function() {
     webrtc.RTCPeerConnection.call(this);

@@ -6,11 +6,11 @@ var BopPingProto = require('./js/protocols.ping.js');
 var bootstrapNode = process.argv[2];
 
 var bopclient = new BOPlishClient(bootstrapNode, function(msg) {
-    process.send({type: 'system', error: null, id: bopclient.id});
+    process.send({type: 'system', error: null, id: bopclient.bopid});
     // Register protocols
 	new BopPingProto(bopclient);
 }, function(err) {
-    process.send({error: err, id: null});
+    process.send({type: 'system', error: err, id: null});
 });
 
 bopclient.setMonitorCallback(function(payload) {
